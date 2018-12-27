@@ -1,19 +1,16 @@
-import { Component } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Camera, CameraOptions } from '@ionic-native/camera/ngx';
-import { PhotoService } from '../../app/photo.service';
+import { Storage } from '@ionic/storage';
 
-@Component({
-  selector: 'app-tab2',
-  templateUrl: 'tab2.page.html',
-  styleUrls: ['tab2.page.scss']
+
+@Injectable({
+  providedIn: 'root'
 })
-export class Tab2Page {
-  currentImage: any;
-  photos: any;
+export class PhotoService {
 
-  constructor(private camera: Camera, public photoService: PhotoService){
+  public photos: Photo[] = [];
+  constructor(private camera: Camera, private storage: Storage) { }
 
-  }
 
   takePicture() {
     const options: CameraOptions = {
@@ -27,14 +24,25 @@ export class Tab2Page {
       // Add new photo to gallery
       this.photos.unshift({
           data: 'data:image/jpeg;base64,' + imageData
-      }); }, (err) => {
+      }); 
+      // Save all photos for later viewing
+      this.storage.set('photos', this.photos);
+    }, (err) => {
       // Handle error
       console.log("Camera issue: " + err);
-      console.log(ImageData);
   });
   }
 
-  ngOnInit() {
-    this.photoService.loadSave();
+  loadSave() {
+    this.storage.get('photos').then((photos) => {
+      this.photos = photos || [];
+      console.log(photos);
+    })
   }
+  
 }
+
+class Photo {
+  data: any;
+}
+
